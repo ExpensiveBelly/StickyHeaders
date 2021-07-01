@@ -2,9 +2,12 @@ package com.example.stickyheaders
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.example.stickyheaders.stickyheaders.StickyHeaderDecoration
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -18,12 +21,15 @@ class MainActivity : AppCompatActivity() {
             addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
         }
 
-        val words =
-            getString(R.string.lorem_ipsum).replace(",", "").replace(".", "").split(" ")
-                .map { it.lowercase(Locale.getDefault()).trim() }.groupBy { it.first() }.toSortedMap()
-
-        adapter.submitList(words.toList().mapIndexed { index, (header, items) ->
-            items.map { StickyItem(index.toLong(), header.toString(), it) }
-        }.flatten())
+        lifecycleScope.launchWhenCreated {
+            val words = withContext(Dispatchers.Default) {
+                getString(R.string.lorem_ipsum).replace(",", "").replace(".", "").split(" ")
+                    .map { it.lowercase(Locale.getDefault()).trim() }.groupBy { it.first() }
+                    .toSortedMap().toList().mapIndexed { index, (header, items) ->
+                        items.map { StickyItem(index.toLong(), header.toString(), it) }
+                    }.flatten()
+            }
+            adapter.submitList(words)
+        }
     }
 }
