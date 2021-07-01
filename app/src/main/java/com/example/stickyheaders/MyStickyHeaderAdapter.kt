@@ -37,7 +37,7 @@ class MyStickyHeaderAdapter :
         class Header(itemView: View) : MyViewHolder(itemView) {
             private val header_label = itemView.findViewById<TextView>(R.id.header_label)
             override fun bind(item: StickyItem) {
-                header_label.text = item.content
+                header_label.text = item.header
             }
 
         }
